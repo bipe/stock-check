@@ -1,8 +1,10 @@
 # stock-check
 Web scrapping python app to check item availability in some retail sellers
 
+## Try it:
+ - The first command-line argument (optional) defines the cooldown between every round of checks. Default is 300s = 5 minutes.
+
 ### Don't rush me:
-- Loop for check every X minutes
 - Multiple URLs
 - Retailer guessing based on URL
 - Add URLs via file
@@ -10,4 +12,5 @@ Web scrapping python app to check item availability in some retail sellers
 ### Don't even hold your breath:
 - Integration to web app
 - SPA retailer sites scrapping
+
 

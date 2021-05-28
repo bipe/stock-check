@@ -1,5 +1,7 @@
 import requests
 import json
+import time
+import sys
 from bs4 import BeautifulSoup
 
 class bcolors:
@@ -17,6 +19,24 @@ def print_in_stock(price):
 
 def print_warn():
     print(bcolors.WARN + "COULDN'T CHECK" + bcolors.ENDCOLOR, end = '- ')
+
+def countdown(seconds):
+    for i in range(seconds, 0, -1):
+        #I had to put some spaces in the end or the last char would be left everytime the string got smaller
+        print("Checking again in", i, "seconds   ", end="\r", flush=True)
+        time.sleep(1)
+
+    print()
+
+def get_cooldown():
+    cooldown = 300
+    if (len(sys.argv) > 1):
+        if (int(sys.argv[1]) > 19 and int(sys.argv[1]) < 99999):
+            cooldown = int(sys.argv[1])
+        else:
+            print("Invalid sleep interval. Cooldown set to 5 minutes.")
+
+    return cooldown
 
 
 def get_float_price(str):
@@ -73,14 +93,14 @@ def get_kbm_price(url):
         price = soup.find(class_="preco_desconto")
 
         if (not price):
-            #When something is out of stock, a div with alt text as below is shown.
+            #When something is out of stock, a div with the alt text below is shown.
             price = soup.find(alt="produto_indisponivel")
             if (price):
                 print_out_stock()
             else:
                 print_warn()
         else:
-            #In Kabum, we have many empty spaces and then more texts inside the same element, so we take the first 15 digits(ignoring texts) and then strip the rest (just spaces)
+            #Kabum stores many empty spaces and then more text inside the same element, so we take the first 15 digits(ignoring texts) and then strip the spaces
             price = price.get_text()[0:15].strip()
             price = get_float_price(price)
             print_in_stock(price)
@@ -113,19 +133,21 @@ def get_fastshop_price(url):
 #available product URL for testing (not in sale):
 #'https://www.kabum.com.br/produto/69306/c-mbio-logitech-g-driving-force-compat-vel-com-volantes-logitech-g29-e-g920-para-ps4-xbox-one-e-pc-941-000119'
 kbm_url = 'https://www.kabum.com.br/produto/115737/console-sony-playstation-5-cfi-1014a'
-get_kbm_price(kbm_url)
 
 #available product URL for testing:
 #'https://www.amazon.com.br/Microsoft-Console-Xbox-Series-S/dp/B08JN2VMGX/ref=pd_sbs_5/140-4748579-5457636'
 amz_url = 'https://www.amazon.com.br/dp/B088GNRX3J/ref=s9_acss_bw_cg_HeroVG_1a1_w'
-get_amz_price(amz_url)
 
 #available product URL for testing (dual schock 4):
 #https://www.fastshop.com.br/wcs/resources/v5/products/byPartNumber/SO3004192AZL_PRD
 #For fastshop, you have to take the API url to get product
 fastshop_url = 'https://www.fastshop.com.br/wcs/resources/v5/products/byPartNumber/SO3005724BCOB'
-get_fastshop_price(fastshop_url)
 
+cooldown = get_cooldown()
 
-
+while (True):
+    get_amz_price(amz_url)
+    get_kbm_price(kbm_url)
+    get_fastshop_price(fastshop_url)
+    countdown(cooldown)
 
