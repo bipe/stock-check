@@ -8,9 +8,8 @@ Web scrapping python app to check item availability in some retail sellers
 
 
 ### Don't rush me:
-~~ - Multiple URLs ~~
-~~ - Retailer guessing based on URL ~~
-~~ - Add URLs via file ~~
+- Organize code
+- Let manually changing user-agent of requests
 
 ### Don't even hold your breath:
 - Integration to web app
