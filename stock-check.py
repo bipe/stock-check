@@ -10,15 +10,19 @@ class bcolors:
     FAIL = '\033[91m'
     ENDCOLOR = '\033[0m'
 
+def currentTime():
+    t = time.localtime()
+    current_time = time.strftime("%H:%M:%S", t)
+    return current_time
 
 def print_out_stock():
-    print(bcolors.FAIL + "OUT OF STOCK\t\t" + bcolors.ENDCOLOR, end = '- ')
+    print(currentTime() + bcolors.FAIL + " OUT OF STOCK\t\t" + bcolors.ENDCOLOR, end = '- ')
 
 def print_in_stock(price):
-    print(bcolors.OK + "!!! IN STOCK:" + bcolors.ENDCOLOR, price, "\t", end = '- ')
+    print(currentTime() + bcolors.OK + " !!! IN STOCK:" + bcolors.ENDCOLOR, price, "\t", end = '- ')
 
 def print_warn():
-    print(bcolors.WARN + "COULDN'T CHECK" + bcolors.ENDCOLOR, end = '- ')
+    print(currentTime() + bcolors.WARN + " COULDN'T CHECK" + bcolors.ENDCOLOR)
 
 def countdown(seconds):
     for i in range(seconds, 0, -1):
@@ -76,7 +80,12 @@ def get_kbm_price(url):
     page = requests.get(url, headers = headers)
     soup = BeautifulSoup(page.content, 'html.parser')
 
-    title = soup.find(id="titulo_det").get_text().strip()
+    title = soup.find(id="titulo_det")
+    if (not title):
+        print_warn()
+        return
+
+    title = title.get_text().strip()
     is_sale = bool(soup.find(id="contador-cm"))
 
     if (is_sale):
@@ -129,30 +138,44 @@ def get_fastshop_price(url):
     
     print(title)
 
+def get_fasts_api_url(link):
+    #For fastshop, we can't scrape the info directly from page, so we get the product id and create an API Url to get data.
+    fasts_pid = link.replace("https://www.fastshop.com.br/web/p/d/", "")
+    fasts_pid = fasts_pid.split("/", 1)[0]
+    link = 'https://www.fastshop.com.br/wcs/resources/v5/products/byPartNumber/'+fasts_pid
+    return link
 
-#available product URL for testing (not in sale):
-#'https://www.kabum.com.br/produto/69306/c-mbio-logitech-g-driving-force-compat-vel-com-volantes-logitech-g29-e-g920-para-ps4-xbox-one-e-pc-941-000119'
-kbm_url = 'https://www.kabum.com.br/produto/115737/console-sony-playstation-5-cfi-1014a'
 
-#available product URL for testing:
-#'https://www.amazon.com.br/Microsoft-Console-Xbox-Series-S/dp/B08JN2VMGX/ref=pd_sbs_5/140-4748579-5457636'
-amz_url = 'https://www.amazon.com.br/dp/B088GNRX3J/ref=s9_acss_bw_cg_HeroVG_1a1_w'
 
-#available product URL for testing (monitor):
-#https://www.fastshop.com.br/web/p/d/SGLC24RG50PTO_PRD/monitor-gamer-curvo-samsung-24-fhd-144-hzhdmi-dp-freesync-preto-serie-crg50-lc24rg50fqlmzd
-#For fastshop, we can't scrape the info directly from page, so we get the product id and create an API Url to get data.
-#API url example: 'https://www.fastshop.com.br/wcs/resources/v5/products/byPartNumber/SO3005724BCOB'
-
-fastshop_url = 'https://www.fastshop.com.br/web/p/d/SO3005724BCO_PRD/console-playstation-5-com-controle-sem-fio-dualsense'
-fasts_pid = fastshop_url.replace("https://www.fastshop.com.br/web/p/d/", "")
-fasts_pid = fasts_pid.split("/", 1)[0]
-fastshop_url = 'https://www.fastshop.com.br/wcs/resources/v5/products/byPartNumber/'+fasts_pid
 
 cooldown = get_cooldown()
 
+f = open("urls.txt", "r")
+url_list = f.readlines()
+amz_links = []
+kbm_links = []
+fst_links = []
+
+for url in url_list:
+    if('amazon.com' in url):
+        amz_links.append(url)
+    elif ('kabum.com.br' in url):
+        kbm_links.append(url)
+    elif ('fastshop.com.br' in url):
+        url = get_fasts_api_url(url)
+        fst_links.append(url)
+    else:
+        print("Invalid URL. Ignoring.")
+
 while (True):
-    get_amz_price(amz_url)
-    get_kbm_price(kbm_url)
-    get_fastshop_price(fastshop_url)
+    for amz_url in amz_links:
+        get_amz_price(amz_url)
+
+    for kbm_url in kbm_links:
+        get_kbm_price(kbm_url)
+
+    for fst_url in fst_links:
+        get_fastshop_price(fst_url)
+
     countdown(cooldown)
 
