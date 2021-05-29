@@ -1,8 +1,6 @@
 # stock-check
 Web scrapping python app to check item availability in some retail sellers
-- Until now, works for Kabum, Amazon and FastShop* links.
-
-_*: FastShop requires the API URL to get the product data._
+- Until now, works for Kabum, Amazon and FastShop links.
 
 ## Try it:
  - The first command-line argument (optional) defines the cooldown between every round of checks. Default is 300s = 5 minutes.
