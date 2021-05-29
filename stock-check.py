@@ -138,10 +138,15 @@ kbm_url = 'https://www.kabum.com.br/produto/115737/console-sony-playstation-5-cf
 #'https://www.amazon.com.br/Microsoft-Console-Xbox-Series-S/dp/B08JN2VMGX/ref=pd_sbs_5/140-4748579-5457636'
 amz_url = 'https://www.amazon.com.br/dp/B088GNRX3J/ref=s9_acss_bw_cg_HeroVG_1a1_w'
 
-#available product URL for testing (dual schock 4):
-#https://www.fastshop.com.br/wcs/resources/v5/products/byPartNumber/SO3004192AZL_PRD
-#For fastshop, you have to take the API url to get product
-fastshop_url = 'https://www.fastshop.com.br/wcs/resources/v5/products/byPartNumber/SO3005724BCOB'
+#available product URL for testing (monitor):
+#https://www.fastshop.com.br/web/p/d/SGLC24RG50PTO_PRD/monitor-gamer-curvo-samsung-24-fhd-144-hzhdmi-dp-freesync-preto-serie-crg50-lc24rg50fqlmzd
+#For fastshop, we can't scrape the info directly from page, so we get the product id and create an API Url to get data.
+#API url example: 'https://www.fastshop.com.br/wcs/resources/v5/products/byPartNumber/SO3005724BCOB'
+
+fastshop_url = 'https://www.fastshop.com.br/web/p/d/SO3005724BCO_PRD/console-playstation-5-com-controle-sem-fio-dualsense'
+fasts_pid = fastshop_url.replace("https://www.fastshop.com.br/web/p/d/", "")
+fasts_pid = fasts_pid.split("/", 1)[0]
+fastshop_url = 'https://www.fastshop.com.br/wcs/resources/v5/products/byPartNumber/'+fasts_pid
 
 cooldown = get_cooldown()
 
