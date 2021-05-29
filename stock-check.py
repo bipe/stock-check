@@ -59,7 +59,14 @@ def get_amz_price(url):
     page = requests.get(url, headers = headers)
     soup = BeautifulSoup(page.content, 'html.parser')
 
-    title = soup.find(id="productTitle").get_text().strip()
+    title = soup.find(id="productTitle")
+    
+    if (not title):
+        print_warn()
+        return
+
+    title = title.get_text().strip()
+
     price = soup.find(id="priceblock_ourprice")
 
     if (not price):

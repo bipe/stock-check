@@ -17,3 +17,4 @@ Web scrapping python app to check item availability in some retail sellers
 - SPA retailer sites scrapping
 
 
+* The sad fact about web scrapping this kind of sites is that they can change at anytime (html elements ids/classes etc). Also, if you check in small intervals, they may send a recaptcha verification.
