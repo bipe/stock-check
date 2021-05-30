@@ -8,6 +8,7 @@ Web scrapping python app to check item availability in some retail sellers
 
 
 ### Don't rush me:
+- Notification (win10, maybe email) when something enters stock/reach a price threshold
 - Organize code
 - Let manually changing user-agent of requests
 
