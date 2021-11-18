@@ -21,7 +21,11 @@ def print_out_stock():
 def print_in_stock(price):
     print(currentTime() + bcolors.OK + " !!! IN STOCK:" + bcolors.ENDCOLOR, price, "\t", end = '- ')
 
-def print_warn():
+def print_warn(exception = None):
+    if (exception):
+        print(currentTime() + bcolors.WARN + " COULDN'T CHECK\t\t" + bcolors.ENDCOLOR + " - " + exception)
+        return
+
     print(currentTime() + bcolors.WARN + " COULDN'T CHECK" + bcolors.ENDCOLOR)
 
 def countdown(seconds):
@@ -109,8 +113,8 @@ def get_kbm_price(url):
         price = soup.find(class_="preco_desconto")
 
         if (not price):
-            #When something is out of stock, a div with the alt text below is shown.
-            price = soup.find(alt="produto_indisponivel")
+            #When something is out of stock, a div with the id below is shown.
+            price = soup.find(id="formularioProdutoIndisponivel")
             if (price):
                 print_out_stock()
             else:
@@ -130,6 +134,11 @@ def get_fastshop_price(url):
 
     response = requests.get(url, headers = headers)
     jsonData = json.loads(response.content)
+
+    if ('errorMessage' in jsonData):
+        print_warn(jsonData['errorMessage'])
+        return
+
     title = jsonData['shortDescription']
 
     if (not jsonData['buyable']):
@@ -151,8 +160,6 @@ def get_fasts_api_url(link):
     fasts_pid = fasts_pid.split("/", 1)[0]
     link = 'https://www.fastshop.com.br/wcs/resources/v5/products/byPartNumber/'+fasts_pid
     return link
-
-
 
 
 cooldown = get_cooldown()
