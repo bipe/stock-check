@@ -2,39 +2,8 @@ import requests
 import json
 import time
 import sys
+import utils
 from bs4 import BeautifulSoup
-
-class bcolors:
-    OK = '\033[92m'
-    WARN = '\033[93m'
-    FAIL = '\033[91m'
-    ENDCOLOR = '\033[0m'
-
-def currentTime():
-    t = time.localtime()
-    current_time = time.strftime("%H:%M:%S", t)
-    return current_time
-
-def print_out_stock():
-    print(currentTime() + bcolors.FAIL + " OUT OF STOCK\t\t" + bcolors.ENDCOLOR, end = '- ')
-
-def print_in_stock(price):
-    print(currentTime() + bcolors.OK + " !!! IN STOCK:" + bcolors.ENDCOLOR, price, "\t", end = '- ')
-
-def print_warn(exception = None):
-    if (exception):
-        print(currentTime() + bcolors.WARN + " COULDN'T CHECK\t\t" + bcolors.ENDCOLOR + " - " + exception)
-        return
-
-    print(currentTime() + bcolors.WARN + " COULDN'T CHECK" + bcolors.ENDCOLOR)
-
-def countdown(seconds):
-    for i in range(seconds, 0, -1):
-        #I had to put some spaces in the end or the last char would be left everytime the string got smaller
-        print("Checking again in", i, "seconds   ", end="\r", flush=True)
-        time.sleep(1)
-
-    print()
 
 def get_cooldown():
     cooldown = 300
@@ -53,15 +22,6 @@ def getAmzPriceElement(soup):
     price = price.find(class_="a-offscreen")
     return price
 
-
-def get_float_price(str):
-    str = str.replace(" ", "")
-    size = len(str)
-    str = str[:size-3]
-    str = str.replace("R$", "")
-    str = str.replace(".", "")
-    return float(str)
-
 def get_amz_price(url):
     headers = ({'User-Agent':
                 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36',
@@ -73,18 +33,18 @@ def get_amz_price(url):
     title = soup.find(id="productTitle")
     
     if (not title):
-        print_warn('title not found')
+        utils.print_warn('title not found')
         return
 
     title = title.get_text().strip()
 
     price = getAmzPriceElement(soup)
     if (not price):
-        print_out_stock()
+        utils.print_out_stock()
     else:
         price = price.get_text()
-        price = get_float_price(price)
-        print_in_stock(price)
+        price = utils.str_to_float_price(price)
+        utils.print_in_stock(price)
     
     print(title)
 
@@ -99,7 +59,7 @@ def get_kbm_price(url):
 
     title = soup.find("h1")
     if (not title):
-        print_warn()
+        utils.print_warn()
         return
 
     title = title.get_text(strip=True)
@@ -109,11 +69,11 @@ def get_kbm_price(url):
         price = soup.find(class_="preco_desconto_avista-cm")
 
         if (not price):
-            print_out_stock()
+            utils.print_out_stock()
         else:
             price = price.get_text()
-            price = get_float_price(price)
-            print_in_stock(price)
+            price = utils.str_to_float_price(price)
+            utils.print_in_stock(price)
 
     else:
         price = soup.find(class_="preco_desconto")
@@ -122,14 +82,14 @@ def get_kbm_price(url):
             #When something is out of stock, a div with the id below is shown.
             price = soup.find(id="formularioProdutoIndisponivel")
             if (price):
-                print_out_stock()
+                utils.print_out_stock()
             else:
-                print_warn()
+                utils.print_warn()
         else:
             #Kabum stores many empty spaces and then more text inside the same element, so we take the first 15 digits(ignoring texts) and then strip the spaces
             price = price.get_text()[0:15].strip()
-            price = get_float_price(price)
-            print_in_stock(price)
+            price = utils.str_to_float_price(price)
+            utils.print_in_stock(price)
 
     print(title)
 
@@ -142,21 +102,21 @@ def get_fastshop_price(url):
     jsonData = json.loads(response.content)
 
     if ('errorMessage' in jsonData):
-        print_warn(jsonData['errorMessage'])
+        utils.print_warn(jsonData['errorMessage'])
         return
 
     title = jsonData['shortDescription']
 
     if (not jsonData['buyable']):
-        print_out_stock()
+        utils.print_out_stock()
 
     else:
         if (jsonData['priceOffer']):
             price = jsonData['priceOffer']
-            print_in_stock(price)
+            utils.print_in_stock(price)
         
         else:
-            print_warn()
+            utils.print_warn()
     
     print(title)
 
@@ -197,5 +157,5 @@ while (True):
     for fst_url in fst_links:
         get_fastshop_price(fst_url)
 
-    countdown(cooldown)
+    utils.countdown(cooldown)
 
