@@ -46,6 +46,13 @@ def get_cooldown():
 
     return cooldown
 
+def getAmzPriceElement(soup):
+    price = soup.find(class_="a-text-price")
+    if (not price):
+        return
+    price = price.find(class_="a-offscreen")
+    return price
+
 
 def get_float_price(str):
     str = str.replace(" ", "")
@@ -66,13 +73,12 @@ def get_amz_price(url):
     title = soup.find(id="productTitle")
     
     if (not title):
-        print_warn()
+        print_warn('title not found')
         return
 
     title = title.get_text().strip()
 
-    price = soup.find(id="priceblock_ourprice")
-
+    price = getAmzPriceElement(soup)
     if (not price):
         print_out_stock()
     else:
@@ -91,12 +97,12 @@ def get_kbm_price(url):
     page = requests.get(url, headers = headers)
     soup = BeautifulSoup(page.content, 'html.parser')
 
-    title = soup.find(id="titulo_det")
+    title = soup.find("h1")
     if (not title):
         print_warn()
         return
 
-    title = title.get_text().strip()
+    title = title.get_text(strip=True)
     is_sale = bool(soup.find(id="contador-cm"))
 
     if (is_sale):
